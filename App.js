@@ -3,7 +3,7 @@ import React, {useState, useCallback, useEffect} from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { GiftedChat } from 'react-native-gifted-chat';
 import db from "./firebase";
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, doc, updateDoc, setDoc} from 'firebase/firestore';
 
 export default function App() {
   const [messages, setMessages] = useState([]);
@@ -20,33 +20,12 @@ export default function App() {
     getChat();
   }, []);
 
-  let dummyMessages = [
-    {
-      _id: 1,
-      text: ' ew',
-      createdAt: new Date(),
-      user: {
-        _id: 2,
-        name: "igor",
-        avatar: 'https://i0.wp.com/post.greatist.com/wp-content/uploads/sites/2/2021/07/369366-grt-Pineapple-Benefits-grt-1296x728-header_body.jpg?w=1155&h=1530',
-      },
-    },
-    {
-      _id: 2,
-      text: 'Sup bro',
-      createdAt: new Date(),
-      user: {
-        _id: 1,
-        name: "ashley",
-        avatar: 'https://d279m997dpfwgl.cloudfront.net/wp/2019/07/0710_peaches-1000x667.jpg',
-      },
-    },
-  ]
-
-  const onSend = useCallback((messages = []) => {
+  const onSend = useCallback(async (messages = []) => {
+    await setDoc(doc(db, "Chats", "myfirstchat"), {
+      messages: messages
+    });
     setMessages(previousMessages => GiftedChat.append(previousMessages, messages))
-  }, [])
-
+}, [])
   
 
   return (
