@@ -3,28 +3,31 @@ import React, {useState, useCallback, useEffect} from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { GiftedChat } from 'react-native-gifted-chat';
 import db from "./firebase";
-import { collection, getDocs, doc, updateDoc, setDoc} from 'firebase/firestore';
+import { collection, getDocs, doc, updateDoc, setDoc, arrayUnion, onSnapshot} from 'firebase/firestore';
 
 export default function App() {
   const [messages, setMessages] = useState([]);
 
   useEffect(() => {
-    async function getChat() {
-      console.log("starting get!")
-      const chatsCol = collection(db, 'Chats');
-      const chatsDoc = await getDocs(chatsCol);
-      const chatData = chatsDoc.docs.map(doc => doc.data());
-      console.log("here chatData", chatData);
-      setMessages(chatData[0].messages);
-    }
-    getChat();
+    let unsubscribeFromNewSnapshots = onSnapshot(doc(db, "Chats", "myfirstchat"), (snapshot) => {
+      console.log("New Snapshot! ------------------------------------------------", snapshot.data().messages);
+      setMessages(snapshot.data().messages);
+    });
+  
+    return function cleanupBeforeUnmounting() {
+      unsubscribeFromNewSnapshots();
+    };
   }, []);
 
   const onSend = useCallback(async (messages = []) => {
-    await setDoc(doc(db, "Chats", "myfirstchat"), {
-      messages: messages
+    console.log("messgaes print---------------------------------------------------------", messages)
+    console.log("messgaes print---------------------------------------------------------", messages)
+    await updateDoc(doc(db, "Chats", "myfirstchat"), {
+      messages: arrayUnion(messages[0])
     });
+    console.log("messages ______________>", messages)
     setMessages(previousMessages => GiftedChat.append(previousMessages, messages))
+    console.log("previous messages2", messages)
 }, [])
   
 
@@ -33,7 +36,7 @@ export default function App() {
       messages={messages}
       onSend={messages => onSend(messages)}
       user={{
-        _id: 2,
+        _id: 1,
         name: "ashley",
         avatar: 'https://media.istockphoto.com/photos/red-apple-picture-id184276818?k=20&m=184276818&s=612x612&w=0&h=QxOcueqAUVTdiJ7DVoCu-BkNCIuwliPEgtAQhgvBA_g=',
       }}
