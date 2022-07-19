@@ -2,11 +2,30 @@ import { Text, View, TextInput, StyleSheet, TouchableOpacity } from 'react-nativ
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import {useState} from "react"
 
-
 export default function LoginScreen({navigation}) {
 	const [email, setEmail] = useState();
 	const [password, setPassword] = useState();
 
+	const auth = getAuth();
+    //finalizes user cresentials and outputs errors
+	async function handleSubmit() {
+		console.log("handle submit envoked!!")
+
+        //either creates user or outputs errors
+		await createUserWithEmailAndPassword(auth, email, password)
+		.then((userCredential) => {
+			const user = userCredential.user;
+			auth.currentUser = user;
+		})
+        //what errors would this be catching, maybe already current user
+		.catch((error) => {
+			const errorCode = error.code;
+			const errorMessage = error.message;
+            console.log(errorCode, "<---- error code");
+            console.log(errorMessage, "<--- error message")
+		});
+	}
+    //showing screen for user to enter information for sign up
 	return (
 		<>
 			<Text style={styles.bigBlue}>Signup Here</Text>
@@ -25,16 +44,22 @@ export default function LoginScreen({navigation}) {
 					onChangeText={(password) => setPassword(password)}
 				/>
 			</View>
-			
 			<TouchableOpacity style={styles.loginBtn} onPress={() => {
-				{/* what do you think will go here? */}
+                //button calls handle submit which sends user input data
+				handleSubmit();
 			}}>
 				<Text style={styles.loginText}>Signup</Text>
 			</TouchableOpacity>
+
+            <TouchableOpacity style={styles.redirectBtn} onPress={() => {
+		navigation.navigate("Login") 
+	}}>
+	        <Text>Already have an account? Login here</Text>
+            </TouchableOpacity>
 		</>
 	)
 }
-
+//sytles all the data the user sees
 const styles = StyleSheet.create({
 	redirectBtn: {
 		width:"80%",
