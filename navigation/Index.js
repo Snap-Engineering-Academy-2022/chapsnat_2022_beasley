@@ -5,6 +5,6 @@ import AuthStack from './AuthStack';
 
 export default function RootNavigation() {
 	const { user } = useAuthentication();
-
+	console.log("user form auth stack: ", user)
 	return user ? <UserStack /> : <AuthStack />;
 }

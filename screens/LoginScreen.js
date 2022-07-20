@@ -15,6 +15,7 @@ export default function LoginScreen({navigation}) {
         await signInWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
             const user = userCredential.user;
+            console.log("user form login screen: ", user)
         })
         //Not using error code again
         .catch((error) => {
